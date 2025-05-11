@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scroll Controlado</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .section {
+      height: 120vh; /* Espaço extra para rolar */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+    }
+    #three-container {
+      height: 100vh;
+      width: 100%;
+      position: relative;
+    }
+    #hud {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    #paragrafo {
+      display: none; /* Escondido por padrão */
+      font-size: 20px;
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(255, 0, 0, 0.8);
+      color: white;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="section">
+    <h1>Role para Interagir</h1>
+    <p>Continue rolando para ver o efeito!</p>
+  </div>
+
+  <!-- Seção do Three.js -->
+  <div id="three-container"></div>
+
+  <div class="section">
+    <h2>Resultados</h2>
+    <p id="paragrafo">🎉 Você alcançou a rolagem desejada! 🎉</p>
+  </div>
+
+  <!-- HUD para Debug -->
+  <div id="hud">
+    Scroll dentro da seção: <span id="scrollValue">0</span>px
+  </div>
+
+  <script>
+    // === CONFIGURAÇÃO DO THREE.JS ===
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    
+    document.getElementById("three-container").appendChild(renderer.domElement);
+
+    // Criando um cubo simples
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+    
+    camera.position.z = 5;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // === CONTROLE DE SCROLL ===
+    const threeContainer = document.getElementById("three-container");
+    const paragrafo = document.getElementById("paragrafo");
+    const scrollValueDisplay = document.getElementById("scrollValue");
+
+    window.addEventListener("scroll", function() {
+      // Posição da seção do Three.js na página
+      const sectionTop = threeContainer.offsetTop;
+      const sectionHeight = threeContainer.clientHeight;
+      const scrollY = window.scrollY;
+
+      // Quanto o usuário já rolou DENTRO da seção do Three.js
+      let scrollInsideSection = scrollY - sectionTop;
+      scrollInsideSection = Math.max(0, Math.min(scrollInsideSection, sectionHeight)); // Mantém entre 0 e o máximo
+
+      // Atualiza o HUD
+      scrollValueDisplay.textContent = scrollInsideSection.toFixed(0);
+
+      // Define quando mostrar o parágrafo (ajuste o valor conforme necessário)
+      if (scrollInsideSection > sectionHeight / 5) {
+        paragrafo.style.display = "block";
+      } else {
+        paragrafo.style.display = "none";
+      }
+    });
+  </script>
+
+</body>
+</html>
